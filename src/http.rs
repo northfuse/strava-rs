@@ -20,6 +20,19 @@ where
     }
 }
 
+pub async fn post<T>(url: &str, form : reqwest::multipart::Form) -> Result<T, ApiError>
+where
+    T: DeserializeOwned,
+{
+    let response = reqwest::Client::builder().build()?.post(url).multipart(form).send().await?;
+    println!("uploaded status={}", response.status());
+    match response.status() {
+        StatusCode::UNAUTHORIZED => Err(ApiError::InvalidAccessToken),
+        StatusCode::BAD_REQUEST => Err(ApiError::BadRequest(response.text().await?)),
+        _ => Ok(response.json().await?),
+    }
+}
+
 pub async fn refresh_tokens(refresh_token: &RefreshToken) -> Result<AccessToken, ApiError> {
     let url = v3(None, "oauth/token".to_string());
     let params = [

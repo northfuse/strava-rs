@@ -13,6 +13,7 @@ pub enum ApiError {
     /// Error in the underlying http implementation
     Http(reqwest::Error),
     BadRequest(String),
+    Io(std::io::Error),
 }
 
 /// A Result type for strava methods
@@ -33,6 +34,7 @@ impl Display for ApiError {
             ApiError::InvalidAccessToken => write!(f, "ApiError::InvalidAccessToken"),
             ApiError::Http(ref e) => write!(f, "ApiError::Http ({})", e),
             ApiError::BadRequest(ref s) => write!(f, "ApiError::BadRequest ({})", s),
+            ApiError::Io(ref s) => write!(f, "ApiError::Io ({})", s),
         }
     }
 }
@@ -40,5 +42,10 @@ impl Display for ApiError {
 impl From<reqwest::Error> for ApiError {
     fn from(e: reqwest::Error) -> ApiError {
         ApiError::Http(e)
+    }
+}
+impl From<std::io::Error> for ApiError {
+    fn from(e: std::io::Error) -> ApiError {
+        ApiError::Io(e)
     }
 }
